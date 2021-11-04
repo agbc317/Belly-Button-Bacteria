@@ -18,17 +18,17 @@ function init() {
     buildCharts(firstSample);
     buildMetadata(firstSample);
   });
-}
-
-// Initialize the dashboard
-init();
+};
 
 function optionChanged(newSample) {
   // Fetch new data each time a new sample is selected
   buildMetadata(newSample);
   buildCharts(newSample);
   
-}
+};
+
+// Initialize the dashboard
+init();
 
 // Demographics Panel 
 function buildMetadata(sample) {
@@ -79,12 +79,15 @@ function buildCharts(sample) {
 
     // 8. Create the trace for the bar chart. 
     var barData = [
-      
+      x= [sample_values],
+      y= [yticks],
+      type= "bar"
     ];
     // 9. Create the layout for the bar chart. 
-   // var barLayout = {
-     
-    });
+    var barLayout = {
+      title: "Top 10 Bacteria Cultures Found"
+    };
     // 10. Use Plotly to plot the data with the layout. 
     Plotly.newPlot("bar", barData, barLayout)
-  };
+  });
+  
