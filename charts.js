@@ -1,35 +1,3 @@
-function init() {
-  // Grab a reference to the dropdown select element
-  var selector = d3.select("#selDataset");
-
-  // Use the list of sample names to populate the select options
-  d3.json("samples.json").then((data) => {
-    var sampleNames = data.names;
-
-    sampleNames.forEach((sample) => {
-      selector
-        .append("option")
-        .text(sample)
-        .property("value", sample);
-    });
-
-    // Use the first sample from the list to build the initial plots
-    var firstSample = sampleNames[0];
-    buildCharts(firstSample);
-    buildMetadata(firstSample);
-  });
-};
-
-function optionChanged(newSample) {
-  // Fetch new data each time a new sample is selected
-  buildMetadata(newSample);
-  buildCharts(newSample);
-  
-};
-
-// Initialize the dashboard
-init();
-
 // Demographics Panel 
 function buildMetadata(sample) {
   d3.json("samples.json").then((data) => {
@@ -58,7 +26,7 @@ function buildCharts(sample) {
   // 2. Use d3.json to load and retrieve the samples.json file 
   d3.json("samples.json").then((data) => {
     // 3. Create a variable that holds the samples array. 
-    var samples = data;
+    var samples = data.samples;
     // 4. Create a variable that filters the samples for the object with the desired sample number.
     var samplesFiltered = samples.filter(sampleObj => sampleObj.id == sample);
     
@@ -78,15 +46,47 @@ function buildCharts(sample) {
     var yticks = otu_ids.slice(0,9).map().reverse()
 
     // 8. Create the trace for the bar chart. 
-    var barData = [
-      x= sample_values,
-      y= yticks,
-      type= "bar"
-    ];
+    var barData = [{
+      x: sample_values.slice(0,9).reverse(),
+      y: yticks,
+      type: "bar"
+    }];
     // 9. Create the layout for the bar chart. 
     var barLayout = {
       title: "Top 10 Bacteria Cultures Found"
     };
     // 10. Use Plotly to plot the data with the layout. 
     Plotly.newPlot("bar", barData, barLayout)
-  });
+  })};
+
+  function init() {
+    // Grab a reference to the dropdown select element
+    var selector = d3.select("#selDataset");
+  
+    // Use the list of sample names to populate the select options
+    d3.json("samples.json").then((data) => {
+      var sampleNames = data.names;
+  
+      sampleNames.forEach((sample) => {
+        selector
+          .append("option")
+          .text(sample)
+          .property("value", sample);
+      });
+  
+      // Use the first sample from the list to build the initial plots
+      var firstSample = sampleNames[0];
+      buildCharts(firstSample);
+      buildMetadata(firstSample);
+    });
+  };
+  
+  function optionChanged(newSample) {
+    // Fetch new data each time a new sample is selected
+    buildMetadata(newSample);
+    buildCharts(newSample);
+    
+  };
+  
+  // Initialize the dashboard
+  init();
