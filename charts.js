@@ -1,3 +1,35 @@
+function init() {
+  // Grab a reference to the dropdown select element
+  var selector = d3.select("#selDataset");
+
+  // Use the list of sample names to populate the select options
+  d3.json("samples.json").then((data) => {
+    var sampleNames = data.names;
+
+    sampleNames.forEach((sample) => {
+      selector
+        .append("option")
+        .text(sample)
+        .property("value", sample);
+    });
+
+    // Use the first sample from the list to build the initial plots
+    var firstSample = sampleNames[0];
+    buildCharts(firstSample);
+    buildMetadata(firstSample);
+  });
+};
+
+function optionChanged(newSample) {
+  // Fetch new data each time a new sample is selected
+  buildMetadata(newSample);
+  buildCharts(newSample);
+  
+};
+
+// Initialize the dashboard
+init();
+
 // Demographics Panel 
 function buildMetadata(sample) {
   d3.json("samples.json").then((data) => {
@@ -36,8 +68,8 @@ function buildCharts(sample) {
     // 6. Create variables that hold the otu_ids, otu_labels, and sample_values.
     var otu_ids = (firstSample.otu_ids);
     console.log(otu_ids);
-    var otu_label = firstSample.otu_labels;
-    console.log(otu_label)
+    var otu_labels = firstSample.otu_labels;
+    console.log(otu_labels)
     var sample_values = firstSample.sample_values;
 
     // 7. Create the yticks for the bar chart.
@@ -52,7 +84,7 @@ function buildCharts(sample) {
       y: yticks,
       type: "bar",
       orientation: 'h',
-      text: otu_label.slice(0,10).map(otuLabel => `${otuLabel}`).reverse(),
+      text: otu_labels,
       hoverinfo: "text"
     }];
     // 9. Create the layout for the bar chart. 
@@ -61,36 +93,27 @@ function buildCharts(sample) {
     };
     // 10. Use Plotly to plot the data with the layout. 
     Plotly.newPlot("bar", barData, barLayout)
-  })};
 
-  function init() {
-    // Grab a reference to the dropdown select element
-    var selector = d3.select("#selDataset");
-  
-    // Use the list of sample names to populate the select options
-    d3.json("samples.json").then((data) => {
-      var sampleNames = data.names;
-  
-      sampleNames.forEach((sample) => {
-        selector
-          .append("option")
-          .text(sample)
-          .property("value", sample);
-      });
-  
-      // Use the first sample from the list to build the initial plots
-      var firstSample = sampleNames[0];
-      buildCharts(firstSample);
-      buildMetadata(firstSample);
-    });
+    // 1. Create the trace for the bubble chart.
+    var bubbleData = [{
+      x: otu_ids,
+      y: sample_values,
+      text: otu_labels,
+      type: 'bubble',
+      mode: 'markers',
+      marker: {
+        color: otu_ids,
+        size: sample_values
+      }
+  }];
+
+  // 2. Create the layout for the bubble chart.
+  var bubbleLayout = {
+    title: "Bacteria Cultures Per Sample"
   };
-  
-  function optionChanged(newSample) {
-    // Fetch new data each time a new sample is selected
-    buildMetadata(newSample);
-    buildCharts(newSample);
-    
-  };
-  
-  // Initialize the dashboard
-  init();
+
+  // 3. Use Plotly to plot the data with the layout.
+  Plotly.newPlot('bubble', bubbleData, bubbleLayout); 
+});
+};
+
